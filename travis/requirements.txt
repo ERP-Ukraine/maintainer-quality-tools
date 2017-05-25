@@ -1,4 +1,5 @@
-http://download.gna.org/pychart/PyChart-1.39.tar.gz
+# http://download.gna.org/pychart/PyChart-1.39.tar.gz
+Python-Chart==1.39
 babel >= 1.0
 decorator
 docutils
