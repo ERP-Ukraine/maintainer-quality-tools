@@ -51,6 +51,8 @@ class WeblateApi(Request):
         self._token = os.environ.get("WEBLATE_TOKEN")
         self.host = os.environ.get(
             "WEBLATE_HOST", "https://weblate.odoo-community.org/api")
+        self.ssh = os.environ.get(
+            "WEBLATE_SSH", "ssh://user@webpage.com")
         self.tempdir = os.path.join(tempfile.gettempdir(), 'weblate_api')
 
     def get_project(self, repo_slug, branch):
@@ -76,12 +78,17 @@ class WeblateApi(Request):
 
     def get_components(self):
         components = []
-        values = self._request(
-            self.host + '/projects/%s/components/' % self.project['slug'])
-        if not values['results']:
-            raise ApiException('No components found in the project "%s"' %
-                               self.project['slug'])
-        for value in values['results']:
+        values = []
+        page = 1
+        while True:
+            data = self._request(self.host +
+                                 '/projects/%s/components/?page=%s' %
+                                 (self.project['slug'], page))
+            values.extend(data['results'] or [])
+            if not data['next']:
+                break
+            page += 1
+        for value in values:
             if value['branch'] and value['branch'] != self.branch:
                 continue
             components.append(value)
